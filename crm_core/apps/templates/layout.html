@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        CRM | {% block title %}{% endblock  %}
+    </title>
+    {% include 'header/header.html' %}
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-2 sidebar p-0 py-3">
+                {% block sidebar %}{% endblock  %}
+            </div>
+            <div class="col-10 p-0">
+                {% block topNav %}{% endblock  %}
+                <div class="content-box p-3">
+                    {% block content %}{% endblock  %}                   
+                </div>
+                <div class="col bg-dark text-white py-1 text-center">
+                    <b>All Rights Reserved by Yogendra</b>
+                </div>
+            </div>
+        </div>
+    </div>  
+</body>
+</html>
