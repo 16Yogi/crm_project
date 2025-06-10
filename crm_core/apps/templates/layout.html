@@ -13,10 +13,12 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-2 sidebar p-0 py-3">
-                {% block sidebar %}{% endblock  %}
+                {% include "navbar/sidebar.html" %}
+                {% comment %} {% block sidebar %}{% endblock  %} {% endcomment %}
             </div>
             <div class="col-10 p-0">
-                {% block topNav %}{% endblock  %}
+                {% include "navbar/topnavbar.html" %}
+                {% comment %} {% block topNav %}{% endblock  %} {% endcomment %}
                 <div class="content-box p-3">
                     {% block content %}{% endblock  %}                   
                 </div>

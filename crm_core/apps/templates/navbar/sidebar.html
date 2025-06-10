@@ -1,7 +1,9 @@
-{% extends "layout.html" %}
-{% block sidebar %}
+{% comment %} {% extends "layout.html" %}
+{% block sidebar %} {% endcomment %}
+{% load static %}
 <div class=" p-0">
-    <img src="media/crm_logo.png" alt="">
+    {% comment %} <img src="media/crm_logo.png" alt=""> {% endcomment %}
+    <img src="{% static 'media/crm_logo.png' %}" alt="">
 </div>
 <hr>
 <div class="col px-0 py-3">
@@ -13,4 +15,4 @@
     <a href="#"><i class="fa-solid fa-user-plus"></i> Team Target</a>
     <a href="#"><i class="fa-solid fa-diagram-project"></i> Project Status</a>
 </div>
-{% endblock  %}
+{% comment %} {% endblock  %} {% endcomment %}

@@ -1,5 +1,8 @@
-from django.urls import path 
+from django.urls import path
+from apps.views.components.anotherView import another_view
+from apps.views.components.startingCalling import startcalls
 
 urlpatterns = [
-    path('',)
+    path('', startcalls, name='startcall'),
+    path('another/', another_view, name='another'),
 ]
