@@ -1,18 +1,14 @@
-{% comment %} {% extends "layout.html" %}
-{% block sidebar %} {% endcomment %}
 {% load static %}
-<div class=" p-0">
-    {% comment %} <img src="media/crm_logo.png" alt=""> {% endcomment %}
+<div class="p-0">
     <img src="{% static 'media/crm_logo.png' %}" alt="">
 </div>
 <hr>
 <div class="col px-0 py-3">
-    <a href="#"><i class="fa-solid fa-phone-volume"></i> Starting Calling</a>
-    <a href="#"><i class="fa-solid fa-users"></i> My Clients</a>
-    <a href="#"><i class="fa-solid fa-bullseye"></i> My Target</a>
-    <a href="#"><i class="fa-solid fa-bars-progress"></i> My Client Progresses</a>
-    <a href="#"><i class="fa-solid fa-people-group"></i> Teams Clients</a>
-    <a href="#"><i class="fa-solid fa-user-plus"></i> Team Target</a>
-    <a href="#"><i class="fa-solid fa-diagram-project"></i> Project Status</a>
+    <a href="{% url 'startcall' %}"><i class="fa-solid fa-phone-volume"></i> Starting Calling</a>
+    <a href="{% url 'myclient' %}"><i class="fa-solid fa-users"></i> My Clients</a>
+    <a href="{% url 'mytarget' %}"><i class="fa-solid fa-bullseye"></i> My Target</a>
+    <a href="{% url 'myclientprogress' %}"><i class="fa-solid fa-bars-progress"></i> My Client Progresses</a>
+    <a href="{% url 'teamClient' %}"><i class="fa-solid fa-people-group"></i> Teams Clients</a>
+    <a href="{% url 'teamTarget' %}"><i class="fa-solid fa-user-plus"></i> Team Target</a>
+    <a href="{% url 'projectstatus' %}"><i class="fa-solid fa-diagram-project"></i> Project Status</a>
 </div>
-{% comment %} {% endblock  %} {% endcomment %}
