@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
-# --- Profile Model (यह लगभग सही था) ---
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     phone_number = models.CharField(max_length=15, blank=True)
@@ -23,7 +23,7 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.user.username} Profile'
 
-# --- Client Model (इसमें सुधार किए गए हैं) ---
+
 class Client(models.Model):
     # यह फील्ड ठीक था
     client_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -93,12 +93,6 @@ class Client(models.Model):
 
 
 
-
-# ... आपके मौजूदा मॉडल्स के बाद ...
-
-# --- Payment Model (नया मॉडल) ---
-# models.py में add करें अगर Payment model नहीं है
-
 class Payment(models.Model):
     PAYMENT_METHODS = [
         ('Cash', 'Cash'),
@@ -132,32 +126,24 @@ class Payment(models.Model):
     def formatted_amount(self):
         return f"₹{self.amount:,.0f}"
 
-# ... Payment मॉडल के बाद ...
 
-# --- Target Model (नया मॉडल) ---
 class Target(models.Model):
-    # यह टारगेट किस कर्मचारी के लिए है
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='targets')
     
-    # टारगेट की राशि
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     
-    # यह टारगेट किस महीने और साल के लिए है
-    month = models.PositiveIntegerField() # जैसे 6 (जून के लिए)
-    year = models.PositiveIntegerField() # जैसे 2024
+    month = models.PositiveIntegerField() 
+    year = models.PositiveIntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # (Optional) टारगेट किसने सेट किया
     set_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='set_targets')
 
     class Meta:
-        # यह सुनिश्चित करेगा कि एक यूज़र के लिए एक महीने में एक ही टारगेट हो
         unique_together = ('user', 'month', 'year')
 
     def __str__(self):
-        # महीने के नाम के लिए एक helper
         import calendar
         month_name = calendar.month_name[self.month]
         return f'Target for {self.user.username} - {month_name} {self.year}'
