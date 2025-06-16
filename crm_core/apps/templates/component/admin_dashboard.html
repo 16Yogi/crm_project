@@ -1,0 +1,178 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+    /* General Page Styling */
+    .main-content-area {
+        padding: 1.5rem;
+    }
+
+    /* --- Stat Cards Styling --- */
+    .stat-card {
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+        height: 100%; /* Ensures all cards in a row are same height */
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    /* Colors for cards */
+    .stat-card-1 { background: linear-gradient(135deg, #e55a73, #f56c84); } /* Pink */
+    .stat-card-2 { background: linear-gradient(135deg, #3a8dff, #4da3ff); } /* Blue */
+    .stat-card-3 { background: linear-gradient(135deg, #ff9b44, #ffb24e); } /* Orange */
+    .stat-card-4 { background: linear-gradient(135deg, #28a745, #2ebf4f); } /* Green */
+    
+    .stat-card p {
+        margin: 0;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    .stat-card h3 {
+        margin: 5px 0 0 0;
+        font-size: 1.7rem;
+        font-weight: 700;
+    }
+
+    /* --- Content Box for Table Styling --- */
+    .content-box {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        height: 100%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .content-box-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 15px;
+    }
+    .content-box-header h6 {
+        font-weight: 600;
+        color: #343a40;
+        margin: 0;
+    }
+    
+    /* --- Table and Progress Bar Styling --- */
+    .table th, .table td { 
+        vertical-align: middle; 
+    }
+    .table thead th {
+        border-top: none;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+    }
+    .agent-name {
+        font-weight: 600;
+        color: #343a40;
+    }
+    .progress { 
+        height: 10px; 
+        margin-top: 5px; 
+        border-radius: 5px;
+        background-color: #e9ecef;
+    }
+    .progress-bar {
+        border-radius: 5px;
+    }
+</style>
+
+<div class="main-content-area">
+    <!-- Stat Cards Row - For Whole Company -->
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card stat-card-1">
+                <div>
+                    <p>Total Monthly Target</p>
+                    <h3>Rs.{{ total_system_target|floatformat:0 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card stat-card-2">
+                <div>
+                    <p>Achieved This Month</p>
+                    <h3>Rs.{{ total_system_achieved|floatformat:0 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card stat-card-3">
+                <div>
+                    <p>Deals Metalized (Month)</p>
+                    <h3>{{ total_metalized_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card stat-card-4">
+                <div>
+                    <p>Total Clients in System</p>
+                    <h3>{{ total_clients_count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Performance Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="content-box">
+                <div class="content-box-header">
+                    <h6>Agent Performance Overview</h6>
+                    <!-- आप यहाँ यूज़र बनाने या रिपोर्ट डाउनलोड करने का बटन जोड़ सकते हैं -->
+                    <!-- <a href="#" class="btn btn-primary btn-sm">Add New Agent</a> -->
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Agent Name</th>
+                                <th>Monthly Target</th>
+                                <th>Achieved This Month</th>
+                                <th style="min-width: 150px;">Target Progress</th>
+                                <th class="text-center">Total Clients</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agent in agent_performance %}
+                            <tr>
+                                <td class="agent-name">{{ agent.username|capfirst }}</td>
+                                <td>Rs. {{ agent.target|floatformat:0 }}</td>
+                                <td>Rs. {{ agent.achieved|floatformat:0 }}</td>
+                                <td>
+                                    {% if agent.target > 0 %}
+                                        {% widthratio agent.achieved agent.target 100 as progress_percentage %}
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress_percentage|default:0 }}%;" aria-valuenow="{{ progress_percentage|default:0 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small class="text-muted">{{ progress_percentage|default:0 }}% Complete</small>
+                                    {% else %}
+                                        <span class="text-muted">No Target Set</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center font-weight-bold">{{ agent.clients_count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No agent data to display.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

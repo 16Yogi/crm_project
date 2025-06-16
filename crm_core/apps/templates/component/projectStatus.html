@@ -1,5 +1,856 @@
 {% extends "layout.html" %}
+{% load static %}
 
 {% block content %}
-<h1>My project status</h1>
-{% endblock  %}
+<!-- CSRF Token -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<style>
+    .project-status-content {
+        padding: 20px;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 100px);
+    }
+    
+    .status-header-section {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .month-input {
+        border: 1px solid #17a2b8;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-size: 14px;
+        width: 150px;
+        background: #17a2b8;
+        color: white;
+        font-weight: 500;
+    }
+    
+    .search-btn {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.3s;
+        font-weight: 500;
+    }
+    
+    .search-btn:hover {
+        background: #138496;
+    }
+    
+    .status-main-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .status-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    
+    .status-table th {
+        background: #f8f9fa;
+        padding: 15px 12px;
+        text-align: center;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 13px;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+    
+    .status-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+        font-size: 12px;
+        text-align: center;
+    }
+    
+    .status-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-action {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: background 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 70px;
+        justify-content: center;
+    }
+    
+    .btn-action:hover {
+        background: #138496;
+        text-decoration: none;
+        color: white;
+    }
+    
+    .btn-edit {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-edit:hover {
+        background: #e0a800;
+        color: #212529;
+    }
+    
+    .btn-view {
+        background: #28a745;
+    }
+    
+    .btn-view:hover {
+        background: #218838;
+    }
+    
+    .agent-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        align-items: flex-start;
+        text-align: left;
+    }
+    
+    .agent-name {
+        font-weight: 600;
+        color: #007bff;
+        font-size: 13px;
+    }
+    
+    .agent-designation {
+        color: #6c757d;
+        font-size: 10px;
+        background: #e9ecef;
+        padding: 2px 6px;
+        border-radius: 8px;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .customer-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        align-items: flex-start;
+        text-align: left;
+    }
+    
+    .customer-name {
+        font-weight: 600;
+        color: #212529;
+        font-size: 13px;
+    }
+    
+    .business-name {
+        color: #6c757d;
+        font-size: 11px;
+        font-style: italic;
+    }
+    
+    .project-type {
+        color: #28a745;
+        font-size: 10px;
+        background: #d4edda;
+        padding: 2px 6px;
+        border-radius: 8px;
+        display: inline-block;
+        font-weight: 500;
+    }
+    
+    .verification-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .total-amount {
+        font-weight: 600;
+        color: #28a745;
+        font-size: 14px;
+    }
+    
+    .payment-amount {
+        color: #007bff;
+        font-size: 11px;
+    }
+    
+    .pending-amount {
+        color: #dc3545;
+        font-size: 11px;
+    }
+    
+    .verification-status {
+        padding: 2px 8px;
+        border-radius: 8px;
+        font-size: 9px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .verified {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .date-info {
+        color: #495057;
+        font-size: 12px;
+        text-align: center;
+        font-weight: 500;
+    }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: center;
+        display: inline-block;
+        min-width: 70px;
+    }
+    
+    .status-new {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .status-progress {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-pending {
+        background: #ffeaa7;
+        color: #8e6a00;
+    }
+    
+    .status-active {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .status-live {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    /* Status Update Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 15px;
+    }
+    
+    .close {
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #aaa;
+    }
+    
+    .close:hover {
+        color: #000;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .form-group select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .modal-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+    
+    .btn-save {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    /* View Details Modal */
+    .details-modal-content {
+        max-width: 700px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .detail-value {
+        color: #212529;
+        font-size: 14px;
+    }
+    
+    .payments-section {
+        margin-top: 20px;
+        border-top: 1px solid #dee2e6;
+        padding-top: 20px;
+    }
+    
+    .payments-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    
+    .payments-table th,
+    .payments-table td {
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        text-align: left;
+        font-size: 12px;
+    }
+    
+    .payments-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+        .status-header-section {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .month-input {
+            width: 100%;
+        }
+        
+        .status-table {
+            font-size: 11px;
+        }
+        
+        .status-table th,
+        .status-table td {
+            padding: 8px 6px;
+        }
+        
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="project-status-content">
+    <!-- Header Section -->
+    <div class="status-header-section">
+        <input type="month" class="month-input" value="{{ month_filter }}" name="month_filter">
+        
+        <button class="search-btn" onclick="filterProjects()">
+            <i class="fa-solid fa-search"></i> Search
+        </button>
+    </div>
+    
+    <!-- Main Section -->
+    <div class="status-main-section">
+        <div class="table-responsive">
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Actions</th>
+                        <th>Added By</th>
+                        <th>Customer & Business</th>
+                        <th>Verification Details Of</th>
+                        <th>{{ filter_month_name }} {{ filter_year }}</th>
+                        <th>Frontend Status</th>
+                        <th>Backend Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if project_data %}
+                        {% for project in project_data %}
+                        <tr>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-view" onclick="viewProject('{{ project.client.client_id }}')" title="View Details">
+                                        <i class="fa-solid fa-eye"></i> View
+                                    </button>
+                                    {% if is_admin or project.client.agent == user %}
+                                    <button class="btn-action btn-edit" onclick="editProjectStatus('{{ project.client.client_id }}', '{{ project.client.project_status }}')" title="Edit Status">
+                                        <i class="fa-solid fa-edit"></i> Edit
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="agent-info">
+                                    <div class="agent-name">{{ project.agent_name }}</div>
+                                    <span class="agent-designation">{{ project.agent_designation }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="customer-info">
+                                    <div class="customer-name">{{ project.customer_name }}</div>
+                                    <div class="business-name">{{ project.business_name }}</div>
+                                    <span class="project-type">{{ project.project_type }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="verification-info">
+                                    <div class="total-amount">₹{{ project.total_amount|floatformat:0 }}</div>
+                                    <div class="payment-amount">Paid: ₹{{ project.total_payments|floatformat:0 }}</div>
+                                    <div class="pending-amount">Pending: ₹{{ project.remaining_amount|floatformat:0 }}</div>
+                                    <span class="verification-status {% if project.verification_amount > 0 %}verified{% else %}pending{% endif %}">
+                                        {% if project.verification_amount > 0 %}Verified{% else %}Pending{% endif %}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-info">
+                                    {{ project.created_date|date:"d M Y" }}<br>
+                                    <small>{{ project.created_date|time:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{% if 'New' in project.frontend_status %}new{% elif 'Progress' in project.frontend_status %}progress{% elif 'Completed' in project.frontend_status %}completed{% else %}cancelled{% endif %}">
+                                    {{ project.frontend_status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{% if 'Pending' in project.backend_status %}pending{% elif 'Active' in project.backend_status %}active{% elif 'Live' in project.backend_status %}live{% else %}cancelled{% endif %}">
+                                    {{ project.backend_status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                    <h5>No Projects Found</h5>
+                                    <p>No projects found for {{ filter_month_name }} {{ filter_year }}.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Status Update Modal -->
+<div id="statusModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5>Update Project Status</h5>
+            <span class="close" onclick="closeStatusModal()">&times;</span>
+        </div>
+        <form id="statusForm">
+            <div class="form-group">
+                <label for="projectStatus">Project Status</label>
+                <select id="projectStatus" name="status" required>
+                    <option value="">Select Status</option>
+                    <option value="New">New Lead</option>
+                    <option value="Contacted">Contacted</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Follow Up">Follow Up</option>
+                    <option value="Not Interested">Not Interested</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeStatusModal()">Cancel</button>
+                <button type="submit" class="btn-save">Update Status</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- View Details Modal -->
+<div id="viewModal" class="modal">
+    <div class="modal-content details-modal-content">
+        <div class="modal-header">
+            <h5>Project Details</h5>
+            <span class="close" onclick="closeViewModal()">&times;</span>
+        </div>
+        <div id="projectDetails">
+            <!-- Project details will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Get CSRF token function
+function getCSRFToken() {
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput) {
+        return csrfInput.value;
+    }
+    return null;
+}
+
+// Filter functions
+function filterProjects() {
+    const monthFilter = document.querySelector('input[name="month_filter"]').value;
+    
+    const url = new URL(window.location);
+    url.searchParams.set('month_filter', monthFilter);
+    
+    window.location.href = url.toString();
+}
+
+// View project details
+function viewProject(clientId) {
+    console.log('Viewing project:', clientId);
+    
+    const csrfToken = getCSRFToken();
+    
+    if (!csrfToken) {
+        alert('CSRF token not found. Please refresh the page.');
+        return;
+    }
+    
+    const data = {
+        client_id: clientId
+    };
+    
+    fetch('/ajax/view_project_details/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showProjectDetails(data.client);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while loading project details');
+    });
+}
+
+function showProjectDetails(client) {
+    const detailsHtml = `
+        <div class="details-grid">
+            <div class="detail-item">
+                <div class="detail-label">Customer Name</div>
+                <div class="detail-value">${client.customer_name}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Business Name</div>
+                <div class="detail-value">${client.business_name}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Phone Number</div>
+                <div class="detail-value">${client.phone}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Email</div>
+                <div class="detail-value">${client.email}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Address</div>
+                <div class="detail-value">${client.address}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Project Type</div>
+                <div class="detail-value">${client.project_type}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Total Amount</div>
+                <div class="detail-value">₹${client.total_amount.toLocaleString()}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Advance Amount</div>
+                <div class="detail-value">₹${client.advance_amount.toLocaleString()}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">${client.status}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Created Date</div>
+                <div class="detail-value">${client.created_date}</div>
+            </div>
+        </div>
+        
+        <div class="payments-section">
+            <h6>Payment History</h6>
+            ${client.payments.length > 0 ? `
+                <table class="payments-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${client.payments.map(payment => `
+                            <tr>
+                                <td>${payment.date}</td>
+                                <td>₹${payment.amount.toLocaleString()}</td>
+                                <td>${payment.method}</td>
+                                <td>${payment.notes}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : '<p>No payments recorded yet.</p>'}
+        </div>
+    `;
+    
+    document.getElementById('projectDetails').innerHTML = detailsHtml;
+    document.getElementById('viewModal').style.display = 'block';
+}
+
+function closeViewModal() {
+    document.getElementById('viewModal').style.display = 'none';
+}
+
+// Modal functions
+let currentClientId = null;
+
+function editProjectStatus(clientId, currentStatus) {
+    currentClientId = clientId;
+    document.getElementById('projectStatus').value = currentStatus;
+    document.getElementById('statusModal').style.display = 'block';
+}
+
+function closeStatusModal() {
+    document.getElementById('statusModal').style.display = 'none';
+    document.getElementById('statusForm').reset();
+    currentClientId = null;
+}
+
+// Form submission
+document.getElementById('statusForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!currentClientId) {
+        alert('No project selected');
+        return;
+    }
+    
+    const formData = new FormData(this);
+    const newStatus = formData.get('status');
+    
+    const data = {
+        client_id: currentClientId,
+        status: newStatus
+    };
+    
+    console.log('Updating status:', data);
+    
+    const csrfToken = getCSRFToken();
+    
+    if (!csrfToken) {
+        alert('CSRF token not found. Please refresh the page.');
+        return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('.btn-save');
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = 'Updating...';
+    saveBtn.disabled = true;
+    
+    fetch('/ajax/update_project_status/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Reset button state
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+        
+        if (data.success) {
+            alert('Status updated successfully!');
+            closeStatusModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        
+        // Reset button state
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+        
+        alert('An error occurred while updating status.');
+    });
+});
+
+// Auto-apply filters
+document.addEventListener('DOMContentLoaded', function() {
+    const monthInput = document.querySelector('input[name="month_filter"]');
+    
+    if (monthInput) {
+        monthInput.addEventListener('change', filterProjects);
+    }
+    
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const statusModal = document.getElementById('statusModal');
+        const viewModal = document.getElementById('viewModal');
+        
+        if (event.target == statusModal) {
+            closeStatusModal();
+        }
+        if (event.target == viewModal) {
+            closeViewModal();
+        }
+    }
+    
+    console.log('📊 Project Status page loaded');
+    console.log('Total projects displayed:', {{ total_projects }});
+});
+</script>
+
+{% endblock %}

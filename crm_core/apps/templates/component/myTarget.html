@@ -1,4 +1,375 @@
 {% extends "layout.html" %}
+{% load static %}
+
 {% block content %}
-<h1>My target</h1>
-{% endblock  %}
+<!-- Debug Information -->
+<div style="background: yellow; padding: 10px; margin: 10px 0;">
+    <strong>DEBUG INFO:</strong><br>
+    Targets Data Length: {{ targets_data|length }}<br>
+    Month Filter: {{ month_filter }}<br>
+    Achieved Amount: {{ achieved_amount }}<br>
+    {% if targets_data %}
+        First Target: {{ targets_data.0.target_amount }}<br>
+    {% endif %}
+</div>
+
+<style>
+    .targets-main-content {
+        padding: 20px;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 100px);
+    }
+    
+    .month-search-section {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .month-input {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-size: 14px;
+        width: 150px;
+    }
+    
+    .search-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .search-btn:hover {
+        background: #218838;
+    }
+    
+    .breadcrumb-section {
+        color: #6c757d;
+        font-size: 14px;
+        margin-left: auto;
+    }
+    
+    .targets-table-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .table-header {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .table-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .targets-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    
+    .targets-table th {
+        background: #f8f9fa;
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 14px;
+    }
+    
+    .targets-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+        font-size: 14px;
+    }
+    
+    .targets-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .assigned-by-info {
+        font-weight: 600;
+        color: #007bff;
+    }
+    
+    .target-amount {
+        font-weight: 600;
+        color: #28a745;
+        font-size: 16px;
+    }
+    
+    .achieved-amount {
+        font-weight: 600;
+        color: #17a2b8;
+        font-size: 16px;
+    }
+    
+    .achievement-progress {
+        width: 100%;
+        height: 8px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+    
+    .progress-achieved { background-color: #28a745; }
+    .progress-ontrack { background-color: #ffc107; }
+    .progress-behind { background-color: #fd7e14; }
+    .progress-critical { background-color: #dc3545; }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-achieved {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-ontrack {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-behind {
+        background: #ffeaa7;
+        color: #8e6a00;
+    }
+    
+    .status-critical {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .month-info {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .date-added {
+        color: #6c757d;
+        font-size: 12px;
+    }
+    
+    .achievement-details {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .percentage-text {
+        font-weight: 600;
+        color: #495057;
+        min-width: 50px;
+    }
+    
+    .remaining-amount {
+        color: #6c757d;
+        font-size: 12px;
+        margin-top: 2px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    .filter-info {
+        background: #e9ecef;
+        padding: 8px 15px;
+        margin-bottom: 0;
+        border-top: 1px solid #dee2e6;
+        font-size: 13px;
+        color: #495057;
+    }
+    
+    .stats-summary {
+        background: #e8f5e8;
+        padding: 10px 15px;
+        border-left: 4px solid #28a745;
+        margin-bottom: 0;
+        font-size: 13px;
+    }
+    
+    .default-target-note {
+        background: #cce5ff;
+        color: #004085;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="targets-main-content">
+    <!-- Month Search Section -->
+    <div class="month-search-section">
+        <input type="month" class="month-input" value="{{ month_filter }}" name="month_filter">
+        <button class="search-btn" onclick="filterByMonth()">
+            <i class="fa-solid fa-search"></i> Search
+        </button>
+        <div class="breadcrumb-section">
+            <i class="fa-solid fa-home"></i> My Targets / {{ filter_month_name }} {{ filter_year }}
+        </div>
+    </div>
+    
+    <!-- Targets Table -->
+    <div class="targets-table-container">
+        <!-- Table Header -->
+        <div class="table-header">
+            <h4 class="table-title">
+                <i class="fa-solid fa-bullseye"></i> My Targets
+            </h4>
+        </div>
+        
+        <!-- Table Content -->
+        <div class="table-responsive">
+            <table class="targets-table">
+                <thead>
+                    <tr>
+                        <th>Assigned By</th>
+                        <th>Target (INR)</th>
+                        <th>Achieved (INR)</th>
+                        <th>Progress</th>
+                        <th>Month</th>
+                        <th>Date Added</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if targets_data %}
+                        {% for target_data in targets_data %}
+                        <tr>
+                            <td>
+                                <div class="assigned-by-info">
+                                    {{ target_data.assigned_by }}
+                                    {% if target_data.is_default %}
+                                        <br><span class="default-target-note">Default Target</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="target-amount">₹{{ target_data.target_amount|floatformat:0 }}</div>
+                            </td>
+                            <td>
+                                <div class="achieved-amount">₹{{ target_data.achieved_amount|floatformat:0 }}</div>
+                                <div class="remaining-amount">
+                                    Remaining: ₹{{ target_data.remaining_amount|floatformat:0 }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="achievement-details">
+                                    <div class="percentage-text">{{ target_data.achievement_percentage }}%</div>
+                                    <div class="achievement-progress" style="width: 100px;">
+                                        <div class="progress-bar 
+                                            {% if target_data.achievement_percentage >= 100 %}progress-achieved
+                                            {% elif target_data.achievement_percentage >= 75 %}progress-ontrack
+                                            {% elif target_data.achievement_percentage >= 50 %}progress-behind
+                                            {% else %}progress-critical{% endif %}" 
+                                            style="width: {{ target_data.achievement_percentage|floatformat:0 }}%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="month-info">{{ target_data.month_name }} {{ target_data.year }}</div>
+                            </td>
+                            <td>
+                                <div class="date-added">{{ target_data.date_added }}</div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ target_data.status|lower }}">
+                                    {{ target_data.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-bullseye"></i>
+                                    <h5>No Targets Found</h5>
+                                    <p>No targets have been set for {{ filter_month_name }} {{ filter_year }}.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if targets_data %}
+        <!-- Summary Section -->
+        <div class="stats-summary">
+            <i class="fa-solid fa-chart-line"></i> 
+            <strong>Summary:</strong> 
+            Showing {{ targets_data|length }} target{{ targets_data|length|pluralize }} for {{ filter_month_name }} {{ filter_year }} | 
+            Total Achieved: ₹{{ achieved_amount|floatformat:0 }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Month filter function
+function filterByMonth() {
+    const monthInput = document.querySelector('input[name="month_filter"]');
+    if (monthInput.value) {
+        const url = new URL(window.location);
+        url.searchParams.set('month_filter', monthInput.value);
+        window.location.href = url.toString();
+    }
+}
+
+// Auto-submit form on month change
+document.addEventListener('DOMContentLoaded', function() {
+    const monthInput = document.querySelector('input[name="month_filter"]');
+    if (monthInput) {
+        monthInput.addEventListener('change', filterByMonth);
+    }
+    
+    console.log('My Target page loaded');
+});
+</script>
+{% endblock %}

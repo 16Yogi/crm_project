@@ -1,5 +1,618 @@
 {% extends "layout.html" %}
+{% load static %}
 
 {% block content %}
-<h1>Team target</h1>
-{% endblock  %}
+<!-- CSRF Token -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<style>
+    .team-target-content {
+        padding: 20px;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 100px);
+    }
+    
+    .target-header-section {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .team-member-select {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-size: 14px;
+        width: 250px;
+        background: white;
+    }
+    
+    .search-btn {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .search-btn:hover {
+        background: #138496;
+    }
+    
+    .manage-target-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .manage-target-btn:hover {
+        background: #218838;
+    }
+    
+    .content-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 20px;
+    }
+    
+    .main-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .section-header {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .section-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .target-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .target-table th {
+        background: #f8f9fa;
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 13px;
+    }
+    
+    .target-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+        font-size: 13px;
+    }
+    
+    .target-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .employee-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .employee-name {
+        font-weight: 600;
+        color: #212529;
+        font-size: 14px;
+    }
+    
+    .employee-designation {
+        color: #6c757d;
+        font-size: 11px;
+        background: #f8f9fa;
+        padding: 2px 6px;
+        border-radius: 8px;
+        display: inline-block;
+        width: fit-content;
+    }
+    
+    .amount-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .received-amount {
+        font-weight: 600;
+        color: #28a745;
+        font-size: 14px;
+    }
+    
+    .target-amount {
+        color: #6c757d;
+        font-size: 11px;
+    }
+    
+    .status-badge {
+        padding: 3px 10px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-achieved {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-active {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+    
+    .btn-target {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 10px;
+        cursor: pointer;
+        transition: background 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+    
+    .btn-target:hover {
+        background: #218838;
+        text-decoration: none;
+        color: white;
+    }
+    
+    /* Added Target Section */
+    .added-target-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .added-target-header {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .added-target-content {
+        padding: 20px;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 15px;
+    }
+    
+    .close {
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #aaa;
+    }
+    
+    .close:hover {
+        color: #000;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .modal-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+    
+    .btn-save {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    @media (max-width: 768px) {
+        .content-wrapper {
+            grid-template-columns: 1fr;
+        }
+        
+        .target-header-section {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .team-member-select {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="team-target-content">
+    <!-- Header Section -->
+    <div class="target-header-section">
+        <select class="team-member-select" name="team_member" onchange="filterTeam()">
+            <option value="all" {% if selected_employee == 'all' %}selected{% endif %}>Select Team Member</option>
+            {% for member in team_members_list %}
+                <option value="{{ member.username }}" {% if selected_employee == member.username %}selected{% endif %}>
+                    {{ member.name }} [ {{ member.designation }} ]
+                </option>
+            {% endfor %}
+        </select>
+        
+        <button class="search-btn" onclick="filterTeam()">
+            <i class="fa-solid fa-search"></i> Search
+        </button>
+        
+        {% if is_admin %}
+        <button class="manage-target-btn" onclick="openTargetModal()">
+            <i class="fa-solid fa-lock"></i> Manage Team Target
+        </button>
+        {% endif %}
+    </div>
+    
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <!-- Main Section -->
+        <div class="main-section">
+            <div class="section-header">
+                <h4 class="section-title">
+                    <i class="fa-solid fa-users"></i> Team Leader & Executive
+                </h4>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="target-table">
+                    <thead>
+                        <tr>
+                            <th>Employee Name (Designation)</th>
+                            <th>Received/Target</th>
+                            <th>This Month Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if team_members_data %}
+                            {% for member in team_members_data %}
+                            <tr>
+                                <td>
+                                    <div class="employee-info">
+                                        <div class="employee-name">{{ member.name }}</div>
+                                        <span class="employee-designation">({{ member.designation }})</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="amount-info">
+                                        <div class="received-amount">₹{{ member.received_amount|floatformat:0 }}</div>
+                                        <div class="target-amount">Target: ₹{{ member.target_amount|floatformat:0 }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ member.status_class }}">
+                                        {{ member.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="#" class="btn-target" onclick="setTarget('{{ member.username }}', {{ member.target_amount }})" title="Set Target">
+                                            <i class="fa-solid fa-plus"></i> Target
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <i class="fa-solid fa-users"></i>
+                                        <h5>No Team Members Found</h5>
+                                        <p>No team members found for the selected filters.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Added Target Section -->
+        <div class="added-target-section">
+            <div class="added-target-header">
+                <h4 class="section-title">
+                    <i class="fa-solid fa-bullseye"></i> Added Target
+                </h4>
+            </div>
+            
+            <div class="added-target-content">
+                <i class="fa-solid fa-target" style="font-size: 48px; opacity: 0.3; margin-bottom: 15px;"></i>
+                <p>No targets have been set yet.</p>
+                <p><small>Use "Manage Team Target" to set targets for team members.</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Set Target Modal -->
+<div id="targetModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5>Set Target</h5>
+            <span class="close" onclick="closeTargetModal()">&times;</span>
+        </div>
+        <form id="targetForm">
+            <div class="form-group">
+                <label for="targetEmployee">Employee</label>
+                <select id="targetEmployee" name="username" required>
+                    <option value="">Select Employee</option>
+                    {% for member in team_members_list %}
+                        <option value="{{ member.username }}">{{ member.name }} ({{ member.designation }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="targetAmount">Target Amount (₹)</label>
+                <input type="number" id="targetAmount" name="target_amount" required min="0" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="targetMonth">Month</label>
+                <input type="month" id="targetMonth" name="target_month" value="{{ month_filter }}" required>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeTargetModal()">Cancel</button>
+                <button type="submit" class="btn-save">Save Target</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Get CSRF token function
+function getCSRFToken() {
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput) {
+        return csrfInput.value;
+    }
+    
+    // Fallback: try to get from cookie
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    return null;
+}
+
+// Filter functions
+function filterTeam() {
+    const teamMember = document.querySelector('select[name="team_member"]').value;
+    
+    const url = new URL(window.location);
+    url.searchParams.set('team_member', teamMember);
+    
+    window.location.href = url.toString();
+}
+
+// Modal functions
+function openTargetModal() {
+    document.getElementById('targetModal').style.display = 'block';
+}
+
+function closeTargetModal() {
+    document.getElementById('targetModal').style.display = 'none';
+    document.getElementById('targetForm').reset();
+}
+
+function setTarget(username, currentAmount) {
+    document.getElementById('targetEmployee').value = username;
+    document.getElementById('targetAmount').value = currentAmount;
+    openTargetModal();
+}
+
+// Form submission with better error handling
+document.getElementById('targetForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    console.log('🎯 Form submitted');
+    
+    const formData = new FormData(this);
+    const targetMonth = formData.get('target_month');
+    const [year, month] = targetMonth.split('-');
+    
+    const data = {
+        username: formData.get('username'),
+        target_amount: formData.get('target_amount'),
+        month: parseInt(month),
+        year: parseInt(year)
+    };
+    
+    console.log('Data to send:', data);
+    
+    const csrfToken = getCSRFToken();
+    console.log('CSRF Token:', csrfToken);
+    
+    if (!csrfToken) {
+        alert('CSRF token not found. Please refresh the page.');
+        return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('.btn-save');
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = 'Saving...';
+    saveBtn.disabled = true;
+    
+    fetch('/ajax/add_team_target/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        
+        // Reset button state
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+        
+        if (data.success) {
+            alert('Target set successfully!');
+            closeTargetModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        
+        // Reset button state
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+        
+        alert('An error occurred while setting target. Check console for details.');
+    });
+});
+
+// Auto-apply filters
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 Team Target page loaded');
+    console.log('CSRF token available:', !!getCSRFToken());
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('targetModal');
+        if (event.target == modal) {
+            closeTargetModal();
+        }
+    }
+});
+</script>
+
+{% endblock %}

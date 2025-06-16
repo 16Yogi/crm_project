@@ -16,7 +16,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api',
-    'apps',
+    'admin_interface',      # <-- इसे जोड़ें
+    'colorfield',
+    'apps.apps.AppsConfig',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
@@ -51,8 +54,12 @@ WSGI_APPLICATION = 'crm_core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'crm',
+        'USER':'root',
+        'PASSWORD':'7748952572',
+        'HOST': 'localhost',
+        'PORT': '3306',  
     }
 }
 
@@ -81,7 +88,7 @@ USE_TZ = True
 
 # STATIC_URL = 'static/'
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'apps/static')]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')

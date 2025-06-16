@@ -1,0 +1,625 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+<!-- CSRF Token -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<style>
+    .transfer-content {
+        padding: 20px;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 100px);
+    }
+    
+    .transfer-header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .transfer-form-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    
+    .section-header {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .section-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .form-content {
+        padding: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    
+    .btn-transfer {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .btn-transfer:hover {
+        background: #218838;
+    }
+    
+    .btn-transfer:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    .transfers-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .transfers-table th {
+        background: #f8f9fa;
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 13px;
+    }
+    
+    .transfers-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+        font-size: 13px;
+    }
+    
+    .transfers-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .client-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .client-name {
+        font-weight: 600;
+        color: #212529;
+    }
+    
+    .client-phone {
+        color: #6c757d;
+        font-size: 11px;
+    }
+    
+    .agent-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .agent-name {
+        font-weight: 600;
+        color: #007bff;
+    }
+    
+    .transfer-arrow {
+        text-align: center;
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .status-badge {
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 9px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .btn-reverse {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 10px;
+        cursor: pointer;
+    }
+    
+    .btn-reverse:hover {
+        background: #c82333;
+    }
+    
+    .alert {
+        padding: 12px 20px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
+    .client-list {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+    
+    .client-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .client-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .client-item.selected {
+        background: #e3f2fd;
+        border-color: #2196f3;
+    }
+    
+    .client-item:last-child {
+        border-bottom: none;
+    }
+    
+    @media (max-width: 768px) {
+        .transfer-content {
+            padding: 10px;
+        }
+        
+        .form-content {
+            padding: 15px;
+        }
+        
+        .transfers-table {
+            font-size: 11px;
+        }
+        
+        .transfers-table th,
+        .transfers-table td {
+            padding: 8px 10px;
+        }
+    }
+</style>
+
+<div class="transfer-content">
+    <!-- Header -->
+    <div class="transfer-header">
+        <h4><i class="fa-solid fa-exchange-alt"></i> Client Transfer Management</h4>
+        <p class="mb-0">Transfer clients between agents (Admin/Team Leader only)</p>
+    </div>
+    
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+    
+    <!-- Transfer Form -->
+    <div class="transfer-form-section">
+        <div class="section-header">
+            <h5 class="section-title">
+                <i class="fa-solid fa-user-friends"></i> Transfer Client
+            </h5>
+        </div>
+        
+        <div class="form-content">
+            <form id="transferForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="fromAgent">From Agent</label>
+                            <select id="fromAgent" class="form-control" required>
+                                <option value="">Select Agent</option>
+                                {% for agent in all_agents %}
+                                    <option value="{{ agent.id }}">
+                                        {{ agent.get_full_name|default:agent.username }}
+                                        {% if agent.profile.designation %} ({{ agent.profile.designation }}){% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Select Client to Transfer</label>
+                            <div id="clientList" class="client-list" style="display: none;">
+                                <!-- Clients will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="toAgent">To Agent</label>
+                            <select id="toAgent" class="form-control" required>
+                                <option value="">Select Target Agent</option>
+                                {% for agent in all_agents %}
+                                    <option value="{{ agent.id }}">
+                                        {{ agent.get_full_name|default:agent.username }}
+                                        {% if agent.profile.designation %} ({{ agent.profile.designation }}){% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reason">Reason for Transfer</label>
+                            <input type="text" id="reason" class="form-control" 
+                                   placeholder="e.g., Workload balancing, Expertise match">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="notes">Additional Notes</label>
+                            <textarea id="notes" class="form-control" rows="3" 
+                                      placeholder="Any additional information..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn-transfer" id="transferBtn">
+                        <i class="fa-solid fa-exchange-alt"></i> Transfer Client
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Recent Transfers -->
+    <div class="transfer-form-section">
+        <div class="section-header">
+            <h5 class="section-title">
+                <i class="fa-solid fa-history"></i> Recent Transfers (Last 30 Days)
+            </h5>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="transfers-table">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>From Agent</th>
+                        <th>To Agent</th>
+                        <th>Date</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if recent_transfers %}
+                        {% for transfer in recent_transfers %}
+                        <tr>
+                            <td>
+                                <div class="client-info">
+                                    <div class="client-name">{{ transfer.client.customer_name }}</div>
+                                    <div class="client-phone">{{ transfer.client.primary_phone }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="agent-info">
+                                    <div class="agent-name">{{ transfer.from_agent.get_full_name|default:transfer.from_agent.username }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="agent-info">
+                                    <div class="agent-name">{{ transfer.to_agent.get_full_name|default:transfer.to_agent.username }}</div>
+                                </div>
+                            </td>
+                            <td>{{ transfer.transfer_date|date:"M d, Y H:i" }}</td>
+                            <td>{{ transfer.reason|default:"No reason" }}</td>
+                            <td>
+                                <span class="status-badge">
+                                    {% if transfer.is_active %}Active{% else %}Reversed{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if transfer.is_active and is_admin %}
+                                <button class="btn-reverse" onclick="reverseTransfer({{ transfer.id }})" title="Reverse Transfer">
+                                    <i class="fa-solid fa-undo"></i> Reverse
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No recent transfers found.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// Get CSRF token function
+function getCSRFToken() {
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput) {
+        return csrfInput.value;
+    }
+    return null;
+}
+
+// Selected client ID
+let selectedClientId = null;
+
+// Load clients by agent
+document.getElementById('fromAgent').addEventListener('change', function() {
+    const agentId = this.value;
+    const clientList = document.getElementById('clientList');
+    
+    if (!agentId) {
+        clientList.style.display = 'none';
+        selectedClientId = null;
+        return;
+    }
+    
+    // Show loading
+    clientList.innerHTML = '<div class="client-item">Loading clients...</div>';
+    clientList.style.display = 'block';
+    
+    fetch(`/ajax/get_clients_by_agent/?agent_id=${agentId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayClients(data.clients);
+            } else {
+                clientList.innerHTML = '<div class="client-item">Error loading clients</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            clientList.innerHTML = '<div class="client-item">Error loading clients</div>';
+        });
+});
+
+function displayClients(clients) {
+    const clientList = document.getElementById('clientList');
+    
+    if (clients.length === 0) {
+        clientList.innerHTML = '<div class="client-item">No clients found for this agent</div>';
+        return;
+    }
+    
+    let html = '';
+    clients.forEach(client => {
+        html += `
+            <div class="client-item" onclick="selectClient('${client.id}', this)">
+                <div class="client-name">${client.name}</div>
+                <div class="client-phone">${client.phone} | ${client.business}</div>
+                <small class="text-muted">${client.status} | ${client.created_date}</small>
+            </div>
+        `;
+    });
+    
+    clientList.innerHTML = html;
+}
+
+function selectClient(clientId, element) {
+    // Remove previous selection
+    document.querySelectorAll('.client-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    // Add selection to clicked item
+    element.classList.add('selected');
+    selectedClientId = clientId;
+    
+    console.log('Selected client:', clientId);
+}
+
+// Form submission
+document.getElementById('transferForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const fromAgent = document.getElementById('fromAgent').value;
+    const toAgent = document.getElementById('toAgent').value;
+    const reason = document.getElementById('reason').value;
+    const notes = document.getElementById('notes').value;
+    
+    // Validation
+    if (!fromAgent) {
+        showAlert('error', 'Please select source agent');
+        return;
+    }
+    
+    if (!selectedClientId) {
+        showAlert('error', 'Please select a client to transfer');
+        return;
+    }
+    
+    if (!toAgent) {
+        showAlert('error', 'Please select target agent');
+        return;
+    }
+    
+    if (fromAgent === toAgent) {
+        showAlert('error', 'Source and target agents cannot be the same');
+        return;
+    }
+    
+    const transferBtn = document.getElementById('transferBtn');
+    const originalText = transferBtn.innerHTML;
+    transferBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Transferring...';
+    transferBtn.disabled = true;
+    
+    const data = {
+        client_id: selectedClientId,
+        to_agent_id: toAgent,
+        reason: reason,
+        notes: notes
+    };
+    
+    const csrfToken = getCSRFToken();
+    
+    fetch('/ajax/execute_client_transfer/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        transferBtn.innerHTML = originalText;
+        transferBtn.disabled = false;
+        
+        if (data.success) {
+            showAlert('success', data.message);
+            
+            // Reset form
+            document.getElementById('transferForm').reset();
+            document.getElementById('clientList').style.display = 'none';
+            selectedClientId = null;
+            
+            // Reload page to show updated transfers
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+            
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Transfer error:', error);
+        transferBtn.innerHTML = originalText;
+        transferBtn.disabled = false;
+        showAlert('error', 'An error occurred while transferring client');
+    });
+});
+
+// Reverse transfer function
+function reverseTransfer(transferId) {
+    if (!confirm('Are you sure you want to reverse this transfer?')) {
+        return;
+    }
+    
+    const csrfToken = getCSRFToken();
+    
+    fetch('/ajax/reverse_client_transfer/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            transfer_id: transferId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', data.message);
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Reverse error:', error);
+        showAlert('error', 'An error occurred while reversing transfer');
+    });
+}
+
+// Show alert function
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass}" role="alert">
+            ${message}
+            <button type="button" class="close" onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 18px; cursor: pointer;">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('alertContainer').innerHTML = alertHtml;
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+        const alert = document.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+// Page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔄 Client Transfer page loaded');
+});
+</script>
+
+{% endblock %}

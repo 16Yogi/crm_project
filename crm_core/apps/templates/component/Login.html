@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CRM Login</title>
+    
+    <!-- ================== CSS Code Here ================== -->
+    <style>
+        /* Body and background styling */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Login container styling */
+        .login-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* Heading styling */
+        .login-container h2 {
+            margin-bottom: 1.5rem;
+            font-size: 24px;
+            color: #1c1e21;
+        }
+        
+        /* Error message styling from Django */
+        .error-message {
+            color: #fa383e;
+            background-color: #ffebe6;
+            border: 1px solid #fa383e;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        /* Input field styling */
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 1rem;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box; /* This includes padding in the width */
+        }
+        
+        input:focus {
+            border-color: #1877f2;
+            outline: none;
+            box-shadow: 0 0 0 2px #e7f3ff;
+        }
+
+        /* Button styling */
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #166fe5;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>CRM Login</h2>
+
+        <!-- Django form error display (if login is incorrect) -->
+        {% if form.errors %}
+            <div class="error-message">
+                <p>Your username and password didn't match. Please try again.</p>
+            </div>
+        {% endif %}
+
+        <!-- ================== HTML Code Here ================== -->
+        <form method="post">
+            
+            <!-- Django security token, this is very important -->
+            {% csrf_token %}
+
+            <div>
+                <input type="text" name="username" placeholder="Username or Email" required autofocus>
+            </div>
+            <div>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" id="login-btn">Log In</button>
+        </form>
+    </div>
+
+    <!-- ================== JavaScript Code Here ================== -->
+    <script>
+        // This ensures that the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            console.log("Login page fully loaded and script is running!");
+
+            const loginButton = document.getElementById('login-btn');
+            
+            // Example: Do something when form is submitted
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function() {
+                // Change button text to show process is running
+                loginButton.textContent = 'Logging In...';
+                loginButton.disabled = true; // Prevent double clicking
+            });
+
+        });
+    </script>
+
+</body>
+</html>

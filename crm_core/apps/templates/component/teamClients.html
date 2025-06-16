@@ -1,5 +1,566 @@
 {% extends "layout.html" %}
+{% load static %}
 
 {% block content %}
-<h1>My team client</h1>
+<style>
+    .team-main-content {
+        padding: 20px;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 100px);
+    }
+    
+    .team-header-section {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .month-input {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-size: 14px;
+        width: 150px;
+    }
+    
+    .team-member-select {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-size: 14px;
+        width: 200px;
+        background: white;
+    }
+    
+    .search-btn {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .search-btn:hover {
+        background: #138496;
+    }
+    
+    .breadcrumb-section {
+        color: #6c757d;
+        font-size: 14px;
+        margin-left: auto;
+    }
+    
+    .team-content-wrapper {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 20px;
+    }
+    
+    .team-sidebar {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+        height: fit-content;
+    }
+    
+    .sidebar-header {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        padding: 15px 20px;
+        font-weight: 600;
+        font-size: 16px;
+    }
+    
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .sidebar-menu li {
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .sidebar-menu li:last-child {
+        border-bottom: none;
+    }
+    
+    .sidebar-menu a {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 20px;
+        text-decoration: none;
+        color: #495057;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+    
+    .sidebar-menu a:hover,
+    .sidebar-menu a.active {
+        background: #f8f9fa;
+        color: #007bff;
+        font-weight: 600;
+    }
+    
+    .count-badge {
+        background: #e9ecef;
+        color: #495057;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    
+    .sidebar-menu a.active .count-badge {
+        background: #007bff;
+        color: white;
+    }
+    
+    .team-main-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .section-header {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .section-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .clients-count {
+        background: rgba(255,255,255,0.2);
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .team-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .team-table th {
+        background: #f8f9fa;
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 13px;
+    }
+    
+    .team-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+        font-size: 13px;
+    }
+    
+    .team-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .customer-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .customer-name {
+        font-weight: 600;
+        color: #212529;
+        font-size: 14px;
+    }
+    
+    .customer-phone {
+        color: #6c757d;
+        font-size: 11px;
+    }
+    
+    .agent-info {
+        font-weight: 600;
+        color: #007bff;
+        font-size: 12px;
+    }
+    
+    .business-info {
+        color: #28a745;
+        font-weight: 600;
+        font-size: 13px;
+    }
+    
+    .status-badge {
+        padding: 3px 10px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-new-lead {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .status-in-progress {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-follow-up {
+        background: #ffeaa7;
+        color: #8e6a00;
+    }
+    
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-not-interested {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .date-info {
+        color: #6c757d;
+        font-size: 11px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .btn-view {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 10px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .btn-view:hover {
+        background: #138496;
+    }
+    
+    .btn-edit {
+        background: #ffc107;
+        color: #212529;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 10px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .btn-edit:hover {
+        background: #e0a800;
+    }
+    
+    .btn-transfer {
+        background: #6f42c1;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 10px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .btn-transfer:hover {
+        background: #59359a;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    .remarks-text {
+        color: #6c757d;
+        font-size: 11px;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    @media (max-width: 768px) {
+        .team-content-wrapper {
+            grid-template-columns: 1fr;
+        }
+        
+        .team-header-section {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .team-member-select,
+        .month-input {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="team-main-content">
+    <!-- Header Section -->
+    <div class="team-header-section">
+        <input type="month" class="month-input" value="{{ month_filter }}" name="month_filter">
+        
+        <select class="team-member-select" name="team_member" onchange="filterTeam()">
+            <option value="all" {% if selected_employee == 'all' %}selected{% endif %}>Select Team Member</option>
+            {% for member in team_members_list %}
+                <option value="{{ member.username }}" {% if selected_employee == member.username %}selected{% endif %}>
+                    {{ member.name }} [ {{ member.designation }} ]
+                </option>
+            {% endfor %}
+        </select>
+        
+        <button class="search-btn" onclick="filterTeam()">
+            <i class="fa-solid fa-search"></i> Search
+        </button>
+        
+        <div class="breadcrumb-section">
+            <i class="fa-solid fa-users"></i> My Clients / {{ page_title }}
+        </div>
+    </div>
+    
+    <!-- Content Wrapper -->
+    <div class="team-content-wrapper">
+        <!-- Sidebar -->
+        <div class="team-sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-filter"></i> Team Clients
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="?team_member={{ selected_employee }}&month_filter={{ month_filter }}&status_filter=all" 
+                       class="{% if status_filter == 'all' %}active{% endif %}">
+                        <span><i class="fa-solid fa-users"></i> Team All Clients</span>
+                        <span class="count-badge">{{ status_counts.all }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="?team_member={{ selected_employee }}&month_filter={{ month_filter }}&status_filter=metalized" 
+                       class="{% if status_filter == 'metalized' %}active{% endif %}">
+                        <span><i class="fa-solid fa-star"></i> Team Total Metalized</span>
+                        <span class="count-badge">{{ status_counts.metalized }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="?team_member={{ selected_employee }}&month_filter={{ month_filter }}&status_filter=Follow Up" 
+                       class="{% if status_filter == 'Follow Up' %}active{% endif %}">
+                        <span><i class="fa-solid fa-phone"></i> Team Total Callback</span>
+                        <span class="count-badge">{{ status_counts.callback }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="?team_member={{ selected_employee }}&month_filter={{ month_filter }}&status_filter=Not Interested" 
+                       class="{% if status_filter == 'Not Interested' %}active{% endif %}">
+                        <span><i class="fa-solid fa-times"></i> Team Total Not Interested</span>
+                        <span class="count-badge">{{ status_counts.not_interested }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="?team_member={{ selected_employee }}&month_filter={{ month_filter }}&status_filter=transferred" 
+                       class="{% if status_filter == 'transferred' %}active{% endif %}">
+                        <span><i class="fa-solid fa-exchange-alt"></i> Team Total Transferred</span>
+                        <span class="count-badge">{{ status_counts.transferred }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="?team_member={{ selected_employee }}&month_filter={{ month_filter }}&status_filter=Completed" 
+                       class="{% if status_filter == 'Completed' %}active{% endif %}">
+                        <span><i class="fa-solid fa-check"></i> Team Total Already Paid</span>
+                        <span class="count-badge">{{ status_counts.already_paid }}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Section -->
+        <div class="team-main-section">
+            <div class="section-header">
+                <h4 class="section-title">
+                    <i class="fa-solid fa-table"></i> {{ page_title }}
+                </h4>
+                <span class="clients-count">{{ team_clients.count }} clients</span>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="team-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Business</th>
+                            <th>Remark</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                            <th>Date Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if team_clients %}
+                            {% for client in team_clients %}
+                            <tr>
+                                <td>
+                                    <div class="customer-info">
+                                        <div class="customer-name">{{ client.customer_name }}</div>
+                                        <div class="customer-phone">📞 {{ client.phone_number }}</div>
+                                        <div class="agent-info">Agent: {{ client.agent.get_full_name|default:client.agent.username }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="business-info">
+                                        {{ client.project_type|default:"N/A" }}
+                                        {% if client.total_amount %}
+                                            <br><small>₹{{ client.total_amount|floatformat:0 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="remarks-text" title="{{ client.remarks|default:'No remarks' }}">
+                                        {{ client.remarks|default:"No remarks"|truncatechars:30 }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ client.project_status|lower|cut:' '|cut:'-' }}">
+                                        {{ client.project_status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="date-info">
+                                        <strong>ID:</strong> {{ client.client_id }}<br>
+                                        {% if client.location %}
+                                            <strong>Location:</strong> {{ client.location|truncatechars:15 }}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-info">
+                                        {{ client.created_at|date:"d M Y" }}<br>
+                                        <small>{{ client.created_at|time:"H:i" }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-view" onclick="viewClient('{{ client.client_id }}')" title="View Details">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        {% if is_admin %}
+                                        <button class="btn-edit" onclick="editClient('{{ client.client_id }}')" title="Edit">
+                                            <i class="fa-solid fa-edit"></i>
+                                        </button>
+                                        <button class="btn-transfer" onclick="transferClient('{{ client.client_id }}')" title="Transfer">
+                                            <i class="fa-solid fa-exchange-alt"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <i class="fa-solid fa-users"></i>
+                                        <h5>No Clients Found</h5>
+                                        <p>No clients found for the selected filters.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Filter functions
+function filterTeam() {
+    const monthFilter = document.querySelector('input[name="month_filter"]').value;
+    const teamMember = document.querySelector('select[name="team_member"]').value;
+    const statusFilter = new URLSearchParams(window.location.search).get('status_filter') || 'all';
+    
+    const url = new URL(window.location);
+    url.searchParams.set('month_filter', monthFilter);
+    url.searchParams.set('team_member', teamMember);
+    url.searchParams.set('status_filter', statusFilter);
+    
+    window.location.href = url.toString();
+}
+
+// Action functions
+function viewClient(clientId) {
+    // Implement view client details
+    alert('View client: ' + clientId);
+}
+
+function editClient(clientId) {
+    // Implement edit client
+    alert('Edit client: ' + clientId);
+}
+
+function transferClient(clientId) {
+    // Implement transfer client
+    alert('Transfer client: ' + clientId);
+}
+
+// Auto-apply filters
+document.addEventListener('DOMContentLoaded', function() {
+    const monthInput = document.querySelector('input[name="month_filter"]');
+    const teamSelect = document.querySelector('select[name="team_member"]');
+    
+    if (monthInput) {
+        monthInput.addEventListener('change', filterTeam);
+    }
+    
+    console.log('👥 Team Client page loaded');
+});
+</script>
+
 {% endblock %}

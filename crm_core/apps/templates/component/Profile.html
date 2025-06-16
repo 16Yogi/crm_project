@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Your styling will remain the same here, no changes needed */
+    .profile-container { display: flex; flex-wrap: wrap; gap: 25px; }
+    .edit-profile-card { flex: 2; min-width: 350px; background-color: #ffffff; padding: 30px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e7e7e7; }
+    .view-profile-card { flex: 1; min-width: 300px; background-color: #ffffff; padding: 30px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e7e7e7; }
+    .card-title { font-size: 18px; font-weight: 600; color: #333; margin-top: 0; margin-bottom: 25px; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 500; font-size: 14px; margin-bottom: 8px; color: #555; }
+    .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #dcdcdc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+    .update-btn { background-color: #1abc9c; color: white; padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; font-weight: 500; transition: background-color 0.2s; }
+    .update-btn:hover { background-color: #16a085; }
+    .profile-pic-container { text-align: center; margin-bottom: 25px; }
+    .profile-pic { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #f1f1f1; }
+    .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-weight: 600; color: #333; }
+    .info-value { color: #666; text-align: right; }
+    .help-text, .errorlist { font-size: 0.8em; color: #777; list-style-type: none; padding-left: 0; margin-top: 4px; color: #d9534f; }
+</style>
+
+<div class="profile-container">
+
+    <!-- =========== LEFT SIDE: EDIT PROFILE FORM (Now using Django Forms) =========== -->
+    <div class="edit-profile-card">
+        <h3 class="card-title">Edit My Profile</h3>
+        
+        <!-- form tag will remain the same -->
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- u_form fields -->
+            <div class="form-group">
+                <label for="{{ u_form.first_name.id_for_label }}">First Name</label>
+                {{ u_form.first_name }}
+                {{ u_form.first_name.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ u_form.last_name.id_for_label }}">Last Name</label>
+                {{ u_form.last_name }}
+                {{ u_form.last_name.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ u_form.email.id_for_label }}">Email</label>
+                {{ u_form.email }}
+                {{ u_form.email.errors }}
+            </div>
+            
+            <hr style="margin: 25px 0; border-color: #f0f0f0;">
+
+            <!-- p_form fields -->
+            <div class="form-group">
+                <label for="{{ p_form.profile_picture.id_for_label }}">Profile Picture</label>
+                {{ p_form.profile_picture }}
+                {{ p_form.profile_picture.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ p_form.phone_number.id_for_label }}">Phone Number</label>
+                {{ p_form.phone_number }}
+                {{ p_form.phone_number.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ p_form.designation.id_for_label }}">Designation</label>
+                {{ p_form.designation }}
+                {{ p_form.designation.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ p_form.branch_address.id_for_label }}">Branch/Address</label>
+                {{ p_form.branch_address }}
+                {{ p_form.branch_address.errors }}
+            </div>
+
+            <button type="submit" class="update-btn">Update My Profile</button>
+        </form>
+    </div>
+
+    <!-- =========== RIGHT SIDE: PROFILE INFORMATION (This is correct) =========== -->
+    <div class="view-profile-card">
+        <div class="profile-pic-container">
+            <!-- Correct way to display profile picture -->
+            {% if user.profile.profile_picture %}
+                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="profile-pic">
+            {% else %}
+                <img src="{% static 'images/default_avatar.png' %}" alt="Default Profile Picture" class="profile-pic">
+            {% endif %}
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">Full Name</span>
+            <span class="info-value">{{ user.get_full_name|default:"N/A" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{ user.email|default:"N/A" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Phone Number</span>
+            <span class="info-value">{{ user.profile.phone_number|default:"N/A" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Designation</span>
+            <span class="info-value">{{ user.profile.designation|default:"N/A" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Branch/Address</span>
+            <span class="info-value">{{ user.profile.branch_address|default:"N/A" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Reporting To</span>
+            <span class="info-value">{{ user.profile.reporting_to.username|default:"N/A" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Signup Date</span>
+            <span class="info-value">{{ user.date_joined|date:"Y-m-d" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Account Status</span>
+            <span class="info-value">{{ user.profile.account_status }}</span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Optional: Add a class to the generated input fields for styling
+document.addEventListener("DOMContentLoaded", function() {
+    var inputs = document.querySelectorAll('.edit-profile-card input, .edit-profile-card select, .edit-profile-card textarea');
+    inputs.forEach(function(input) {
+        if (!input.classList.contains('update-btn')) {
+            input.classList.add('form-control'); // Add a common class if needed
+        }
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,304 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .add-member-content {
+        padding: 20px;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 100px);
+    }
+    
+    .form-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 30px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .form-header h2 {
+        color: #495057;
+        margin-bottom: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    
+    .form-group.required label::after {
+        content: " *";
+        color: #dc3545;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+        width: 100%;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+    }
+    
+    .btn-submit:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .debug-info {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
+        margin-top: 20px;
+        font-family: monospace;
+        font-size: 12px;
+    }
+    
+    .alert {
+        padding: 12px 20px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-container {
+            margin: 0 10px;
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="add-member-content">
+    <div class="form-container">
+        <div class="form-header">
+            <h2><i class="fa-solid fa-user-plus"></i> Add Team Member</h2>
+            <p>Fill in the details to add a new team member</p>
+        </div>
+        
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="POST" id="teamMemberForm">
+            {% csrf_token %}
+            
+            <div class="form-group required">
+                <label for="name">Full Name</label>
+                <input type="text" 
+                       id="name" 
+                       name="name" 
+                       value="{{ form_data.name|default:'' }}"
+                       placeholder="Enter full name" 
+                       required>
+            </div>
+            
+            <div class="form-group required">
+                <label for="email">Email Address</label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       value="{{ form_data.email|default:'' }}"
+                       placeholder="Enter email address" 
+                       required>
+            </div>
+            
+            <div class="form-group required">
+                <label for="phone">Phone Number</label>
+                <input type="tel" 
+                       id="phone" 
+                       name="phone" 
+                       value="{{ form_data.phone|default:'' }}"
+                       placeholder="Enter phone number" 
+                       required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group required">
+                    <label for="role">Role</label>
+                    <select id="role" name="role" required>
+                        <option value="">Select Role</option>
+                        {% for role in roles %}
+                            <option value="{{ role }}" {% if form_data.role == role %}selected{% endif %}>
+                                {{ role }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group required">
+                    <label for="department">Department</label>
+                    <select id="department" name="department" required>
+                        <option value="">Select Department</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept }}" {% if form_data.department == dept %}selected{% endif %}>
+                                {{ dept }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <i class="fa-solid fa-user-plus"></i> Add Team Member
+            </button>
+        </form>
+        
+        <!-- Debug Info (Only show in development) -->
+        {% if user.is_superuser %}
+        <div class="debug-info">
+            <strong>Debug Info:</strong><br>
+            User: {{ user.username }} (Staff: {{ user.is_staff }})<br>
+            Method: {{ request.method }}<br>
+            Total Team Members: <span id="memberCount">Loading...</span><br>
+            <button onclick="checkDatabase()" style="margin-top: 10px; padding: 5px 10px;">Check Database</button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('teamMemberForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        console.log('🎯 Form submitted');
+        
+        // Get form data
+        const formData = new FormData(this);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value.trim();
+        }
+        
+        console.log('Form data:', data);
+        
+        // Basic validation
+        const required = ['name', 'email', 'phone', 'role', 'department'];
+        const missing = required.filter(field => !data[field]);
+        
+        if (missing.length > 0) {
+            e.preventDefault();
+            alert('Please fill in all required fields: ' + missing.join(', '));
+            return;
+        }
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(data.email)) {
+            e.preventDefault();
+            alert('Please enter a valid email address');
+            return;
+        }
+        
+        // Phone validation
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(data.phone.replace(/\D/g, ''))) {
+            e.preventDefault();
+            alert('Please enter a valid 10-digit phone number');
+            return;
+        }
+        
+        // Show loading state
+        submitBtn.textContent = 'Adding...';
+        submitBtn.disabled = true;
+        
+        console.log('✅ Form validation passed, submitting...');
+    });
+    
+    // Load member count for debug
+    if (document.getElementById('memberCount')) {
+        checkDatabase();
+    }
+});
+
+function checkDatabase() {
+    fetch('/debug-team-members/')
+        .then(response => response.json())
+        .then(data => {
+            if (document.getElementById('memberCount')) {
+                document.getElementById('memberCount').textContent = data.total_count;
+            }
+            console.log('Database debug:', data);
+        })
+        .catch(error => {
+            console.error('Debug error:', error);
+            if (document.getElementById('memberCount')) {
+                document.getElementById('memberCount').textContent = 'Error';
+            }
+        });
+}
+</script>
+
+{% endblock %}

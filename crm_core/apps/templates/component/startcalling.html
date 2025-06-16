@@ -1,236 +1,539 @@
 {% extends "layout.html" %}
+{% load static %}
+{% load humanize %}
+
 {% block content %}
-{% comment %} <div class="col title ">
-    <h2>
-        <i class="fa-solid fa-house-laptop"></i>
-        Minimal Dashboard
-    </h2>
-    <div class='row'>
-        <div class="col-10 pb-4">
-            <i class="fa-solid fa-house-user"></i>
-            <span> / </span> 
-            <span>Dashboard</span>
-            <span> / </span> 
-            <span>Minimal Dashboard Example</span>
-        </div>
-        <div class="col-2 text-right">
-            <div class="input-group mb-3 optionSelect">
-                <select class="custom-select" id="inputGroupSelect01">
-                    <option selected>Choose...</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                </select>
-            <div>
-            <i class="fa-solid fa-toggle-off p-2"></i>
-        </div>
-    </div>
-</div> {% endcomment %}
-<div class="col">
-    <div class="row py-3">
-        <div class="col-4">
-            <div class="col item item-1">
-                <div class="row">
-                    <div class="col-10 p-0">
-                        <p>Total Target</p>
-                        <h3>Rs. 21000/ Rs.0</h3>
-                    </div>
-                    <div class="col-2 p-0">
-                        <i class="fa-regular fa-money-bill-1"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="col item item-2">
-                <div class="row">
-                    <div class="col-10 p-0">
-                        <p>Month Metalized</p>
-                        <h3>3</h3>
-                    </div>
-                    <div class="col-2 p-0">
-                        <i class="fa-solid fa-calendar"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="col item item-3">
-                <div class="row">
-                    <div class="col-10 p-0">
-                        <p>Total Call Back</p>
-                        <h3>0</h3>
-                    </div>
-                    <div class="col-2 p-0">
-                        <i class="fa-solid fa-bell"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="col">
+<style>
+    .main-content-area {
+        padding: 1.5rem;
+        background-color: #f4f7f6;
+    }
+    .stat-card {
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+    }
+    .stat-card-1 { background: linear-gradient(135deg, #e55a73, #f56c84); }
+    .stat-card-2 { background: linear-gradient(135deg, #3a8dff, #4da3ff); }
+    .stat-card-3 { background: linear-gradient(135deg, #ff9b44, #ffb24e); }
+    .stat-card p {
+        margin: 0;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    .stat-card h3 {
+        margin: 5px 0 0 0;
+        font-size: 1.6rem;
+        font-weight: 600;
+    }
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+    .content-box {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .content-box-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 15px;
+    }
+    .content-box-header h6 {
+        font-weight: 600;
+        color: #343a40;
+    }
+    .table thead th {
+        border-top: none;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        background-color: #f8f9fa;
+        white-space: nowrap;
+    }
+    .modal-header {
+        background-color: #f8f9fa;
+    }
+    
+    /* Alert styles */
+    .alert-custom {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        animation: slideInRight 0.3s ease-in-out;
+    }
+    
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .form-error {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+    
+    .error-message {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="main-content-area">
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+    
+    <!-- Stat Cards Row -->
     <div class="row">
-        <div class="col">
-            <div class="col content">
-                <div class="row">
-                    <div class="col py-3">
-                        <h6>My Client(Today)</h6>
-                    </div>
-                    <div class="col py-3">
-                        <button class="btn btn-info"><i class="fa-solid fa-user-plus"></i> Add New Client</button>
-                    </div>
-                    <div class="col">
-                        <table class="table">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th scope="col">Customer</th>
-                                    <th scope="col">Phone</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Details</th>
-                                    <th scope="col">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th scope="row">1</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>hello</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">1</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>hello</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">1</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>hello</td>
-                                </tr>
-                            </tbody>
-                          </table>
-                    </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="stat-card stat-card-1">
+                <div>
+                    <p>Total Target / Achieved</p>
+                    <h3 id="targetAchieved">₹21,000 / ₹0</h3>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-bullseye"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="stat-card stat-card-2">
+                <div>
+                    <p>Month Metallized</p>
+                    <h3>3</h3>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-12 mb-4">
+            <div class="stat-card stat-card-3">
+                <div>
+                    <p>Today, Call Back</p>
+                    <h3>0</h3>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-bell"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Tables Row -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="content-box">
+                <div class="content-box-header">
+                    <h6>My Clients (Today)</h6>
+                    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#addClientModal">
+                        <i class="fa-solid fa-user-plus mr-1"></i> Add New Client
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover" id="myClientsTable">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientsTableBody">
+                            {% for client in clients_today %}
+                            <tr>
+                                <td>{{ client.customer_name }}</td>
+                                <td>{{ client.primary_phone }}</td>
+                                <td><span class="badge badge-info">{{ client.project_status }}</span></td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-secondary" title="Edit" data-client-id="{{ client.client_id }}">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-info" title="View" data-client-id="{{ client.client_id }}">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr id="noClientsRow">
+                                <td colspan="4" class="text-center text-muted py-4">No clients added today.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="col content">
-                <div class="row">
-                    <div class="col py-3">
-                        <h6>Client Transfered To Me (Today)</h6>
-                    </div>
-                    <div class="col">
-                        {% comment %} <table class="table">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th scope="col">Customer</th>
-                                    <th scope="col">Phone</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Details</th>
-                                    <th scope="col">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th scope="row">1</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>hello</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>hello</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">3</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>hello</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">4</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>hello</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">5</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>hello</td>
-                                </tr>
-                            </tbody>
-                        </table> {% endcomment %}
-                        {% comment %} <table class="table" id="dataTable">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th scope="col">Customer</th>
-                                    <th scope="col">Phone</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Details</th>
-                                    <th scope="col">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><th scope="row">1</th><td>Mark</td><td>Active</td><td>@mdo</td><td>hello</td></tr>
-                                <tr><th scope="row">2</th><td>Tom</td><td>Inactive</td><td>@tom</td><td>hello</td></tr>
-                                <tr><th scope="row">3</th><td>Anna</td><td>Active</td><td>@anna</td><td>hello</td></tr>
-                                <tr><th scope="row">4</th><td>John</td><td>Inactive</td><td>@john</td><td>hello</td></tr>
-                                <tr><th scope="row">5</th><td>Sara</td><td>Active</td><td>@sara</td><td>hello</td></tr>
-                                <tr><th scope="row">6</th><td>Mike</td><td>Active</td><td>@mike</td><td>hello</td></tr>
-                                <tr><th scope="row">7</th><td>Lilly</td><td>Inactive</td><td>@lilly</td><td>hello</td></tr>
-                                <tr><th scope="row">8</th><td>Robert</td><td>Active</td><td>@robert</td><td>hello</td></tr>
-                                <tr><th scope="row">9</th><td>David</td><td>Inactive</td><td>@david</td><td>hello</td></tr>
-                                <tr><th scope="row">10</th><td>Priya</td><td>Active</td><td>@priya</td><td>hello</td></tr>
-                                <tr><th scope="row">11</th><td>Alan</td><td>Inactive</td><td>@alan</td><td>hello</td></tr>
-                                <tr><th scope="row">12</th><td>Neha</td><td>Active</td><td>@neha</td><td>hello</td></tr>
-                                <tr><th scope="row">13</th><td>Steve</td><td>Inactive</td><td>@steve</td><td>hello</td></tr>
-                                <tr><th scope="row">14</th><td>Karishma</td><td>Active</td><td>@karishma</td><td>hello</td></tr>
-                                <tr><th scope="row">15</th><td>Farhan</td><td>Active</td><td>@farhan</td><td>hello</td></tr>
-                            </tbody>
-                        </table> {% endcomment %}
-                        <table class="table table-bordered table-striped" id="dataTable">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th scope="col">Customer</th>
-                                    <th scope="col">Phone</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Details</th>
-                                    <th scope="col">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for customer in customers %}
-                                <tr>
-                                    <th scope="row">{{ customer.id }}</th>
-                                    <td>{{ customer.name }}</td>
-                                    <td>{{ customer.status }}</td>
-                                    <td>{{ customer.handle }}</td>
-                                    <td>{{ customer.action }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        <nav>
-                            <ul class="pagination justify-content-center" id="pagination"></ul>
-                        </nav>
-                    </div>
+        <div class="col-md-6 mb-4">
+            <div class="content-box">
+                <div class="content-box-header">
+                     <h6>Clients Transferred To Me (Today)</h6>
                 </div>
+                 <div class="table-responsive">
+                    <table class="table table-sm">
+                         <thead class="thead-light">
+                            <tr>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No clients transferred today.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock  %}
+
+<!-- ============================================================== -->
+<!--                  ADD NEW CLIENT MODAL                          -->
+<!-- ============================================================== -->
+<div class="modal fade" id="addClientModal" tabindex="-1" role="dialog" aria-labelledby="addClientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addClientModalLabel">Add New Client</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <form id="addClientForm" method="POST" action="{% url 'add_client' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Customer Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="customer_name" required>
+                                <div class="error-message" id="error_customer_name"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Business Name</label>
+                                <input type="text" class="form-control" name="business_name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Business Address</label>
+                                <input type="text" class="form-control" name="business_address">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Primary Phone <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" name="primary_phone" required>
+                                <div class="error-message" id="error_primary_phone"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Secondary Phone</label>
+                                <input type="tel" class="form-control" name="secondary_phone">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Business Email</label>
+                                <input type="email" class="form-control" name="business_email">
+                                <div class="error-message" id="error_business_email"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Business GST Number</label>
+                                <input type="text" class="form-control" name="business_gst_number">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Industry Type</label>
+                                <input type="text" class="form-control" name="industry_type">
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Work Required (Project Type)</label>
+                                <input type="text" class="form-control" name="project_type" value="Web Design & Development">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Project Handover date (Due Date)</label>
+                                <input type="date" class="form-control" name="project_handover_date">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Any Remark</label>
+                        <textarea class="form-control" name="remark" rows="2"></textarea>
+                    </div>
+                    <hr>
+                    <div class="row align-items-end">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Project Status <span class="text-danger">*</span></label>
+                                <select class="form-control" name="project_status" required>
+                                    <option value="New" selected>New</option>
+                                    <option value="Contacted">Contacted</option>
+                                    <option value="Matlize">Matlize</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Total Payable & Advance Amount (INR) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" placeholder="Total Amount" name="total_amount" required min="0">
+                                    <input type="number" class="form-control" placeholder="Advance Amount" name="advance_amount" value="0" min="0">
+                                </div>
+                                <div class="error-message" id="error_total_amount"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="saveClientBtn">Save Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    // Update any URLs in JavaScript
+    const STARTCALLS_URL = "{% url 'startcalls' %}";  // Changed from 'startcall' to 'startcalls'
+    $(document).ready(function() {
+        // Debug: Check if everything is loaded
+        console.log('🔥 JavaScript loaded');
+        console.log('Form found:', $('#addClientForm').length > 0);
+        console.log('CSRF token:', $('[name=csrfmiddlewaretoken]').val());
+        
+        // Add debug button for testing
+        $('body').append(`
+            <div style="position: fixed; top: 10px; right: 10px; z-index: 10000; background: #fff; padding: 5px; border: 1px solid #ccc;">
+                <button id="testBtn" class="btn btn-sm btn-warning">Test</button>
+            </div>
+        `);
+        
+        $('#testBtn').click(function() {
+            console.log('🧪 Testing client creation...');
+            $.post('/ajax/test_client/', {
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            }).done(function(data) {
+                alert('Test result: ' + data.message);
+                console.log('Test result:', data);
+                if (data.status === 'success') {
+                    location.reload(); // Reload to show new client
+                }
+            }).fail(function(xhr) {
+                alert('Test failed: ' + xhr.responseText);
+                console.error('Test failed:', xhr.responseText);
+            });
+        });
+        
+        // Form submission handler - ENHANCED VERSION
+        $('#addClientForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            console.log('🚀 Form submitted');
+            
+            // Basic validation
+            var customerName = $('[name="customer_name"]').val().trim();
+            var primaryPhone = $('[name="primary_phone"]').val().trim();
+            var totalAmount = $('[name="total_amount"]').val().trim();
+            
+            if (!customerName) {
+                alert('Customer name is required');
+                $('[name="customer_name"]').focus();
+                return false;
+            }
+            
+            if (!primaryPhone) {
+                alert('Primary phone is required');
+                $('[name="primary_phone"]').focus();
+                return false;
+            }
+            
+            if (!totalAmount || totalAmount <= 0) {
+                alert('Total amount is required and must be greater than 0');
+                $('[name="total_amount"]').focus();
+                return false;
+            }
+            
+            var formData = $(this).serialize();
+            var saveButton = $('#saveClientBtn');
+            
+            console.log('Form data being sent:', formData);
+            console.log('CSRF Token:', $('[name=csrfmiddlewaretoken]').val());
+            
+            // Show loading state
+            saveButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+            
+            // AJAX POST request
+            $.ajax({
+                type: 'POST',
+                url: '{% url "add_client" %}',
+                data: formData,
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                success: function(response) {
+                    console.log('✅ Server response:', response);
+                    
+                    if (response.status === 'success') {
+                        showAlert('success', 'Client added successfully!');
+                        
+                        // Add client to table without page reload
+                        addClientToTable(response.client);
+                        
+                        // Reset and close modal
+                        $('#addClientForm')[0].reset();
+                        $('#addClientModal').modal('hide');
+                        
+                    } else if (response.status === 'warning') {
+                        showAlert('warning', response.message);
+                    } else {
+                        showAlert('error', response.message || 'Something went wrong');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ AJAX Error:', {
+                        status: status,
+                        error: error,
+                        responseText: xhr.responseText,
+                        statusCode: xhr.status,
+                        readyState: xhr.readyState
+                    });
+                    
+                    let errorMessage = 'Server error occurred';
+                    
+                    if (xhr.status === 0) {
+                        errorMessage = 'No connection to server. Check if Django is running.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = 'Permission denied. Check CSRF token.';
+                    } else if (xhr.status === 404) {
+                        errorMessage = 'URL not found. Check URL configuration.';
+                    } else if (xhr.status === 500) {
+                        errorMessage = 'Server error. Check Django logs.';
+                    } else if (status === 'timeout') {
+                        errorMessage = 'Request timeout.';
+                    } else {
+                        errorMessage = xhr.responseText || error;
+                    }
+                    
+                    showAlert('error', errorMessage);
+                },
+                complete: function() {
+                    // Re-enable button
+                    saveButton.prop('disabled', false).html('Save Client');
+                }
+            });
+            
+            return false; // Prevent any default form submission
+        });
+        
+        // Reset form when modal closes
+        $('#addClientModal').on('hidden.bs.modal', function () {
+            $('#addClientForm')[0].reset();
+            clearFormErrors();
+        });
+        
+        // Helper functions
+        function addClientToTable(client) {
+            const tbody = $('#clientsTableBody');
+            const noClientsRow = $('#noClientsRow');
+            
+            // Remove "no clients" row if it exists
+            if (noClientsRow.length) {
+                noClientsRow.remove();
+            }
+            
+            // Create new row
+            const newRow = `
+                <tr>
+                    <td>${client.customer_name}</td>
+                    <td>${client.primary_phone}</td>
+                    <td><span class="badge badge-info">${client.project_status}</span></td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-outline-secondary" title="Edit" data-client-id="${client.id || ''}">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <a href="#" class="btn btn-sm btn-outline-info" title="View" data-client-id="${client.id || ''}">
+                            <i class="fa fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+            `;
+            
+            // Add new row to top of table
+            tbody.prepend(newRow);
+            
+            console.log('✅ Client added to table:', client.customer_name);
+        }
+        
+        function clearFormErrors() {
+            $('.form-control').removeClass('form-error');
+            $('.error-message').text('');
+        }
+        
+        function showAlert(type, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 
+                              type === 'warning' ? 'alert-warning' : 'alert-danger';
+            
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show alert-custom" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+            
+            $('#alertContainer').html(alertHtml);
+            
+            // Auto hide after 5 seconds
+            setTimeout(function() {
+                $('.alert-custom').alert('close');
+            }, 5000);
+        }
+    });
+</script>
+{% endblock %}

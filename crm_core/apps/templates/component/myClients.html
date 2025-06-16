@@ -1,5 +1,871 @@
 {% extends "layout.html" %}
+{% load static %}
 
 {% block content %}
-<h1>My client information</h1>
-{% endblock  %}
+<style>
+    .clients-main-content {
+        padding: 20px;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 100px);
+    }
+    
+    .month-search-section {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .month-input {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-size: 14px;
+        width: 150px;
+    }
+    
+    .search-btn {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .search-btn:hover {
+        background: #138496;
+    }
+    
+    .breadcrumb-section {
+        color: #6c757d;
+        font-size: 14px;
+        margin-left: auto;
+    }
+    
+    .clients-table-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .table-header {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .table-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .add-client-btn {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: background 0.3s;
+        cursor: pointer;
+    }
+    
+    .add-client-btn:hover {
+        background: #138496;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .clients-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    
+    .clients-table th {
+        background: #f8f9fa;
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 14px;
+    }
+    
+    .clients-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+        font-size: 14px;
+    }
+    
+    .clients-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .customer-info strong {
+        color: #212529;
+        font-size: 14px;
+    }
+    
+    .customer-email {
+        color: #6c757d;
+        font-size: 12px;
+    }
+    
+    .business-info strong {
+        color: #212529;
+        font-size: 14px;
+    }
+    
+    .business-type {
+        color: #6c757d;
+        font-size: 12px;
+    }
+    
+    .phone-number {
+        color: #007bff;
+        font-weight: 500;
+    }
+    
+    .remark-text {
+        color: #6c757d;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-new {
+        background: #cce5ff;
+        color: #0066cc;
+    }
+    
+    .status-contacted {
+        background: #fff2cc;
+        color: #cc8800;
+    }
+    
+    .status-inprogress {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-completed {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .amount-info {
+        text-align: right;
+    }
+    
+    .total-amount {
+        font-weight: 600;
+        color: #28a745;
+        font-size: 14px;
+    }
+    
+    .advance-amount {
+        color: #6c757d;
+        font-size: 12px;
+    }
+    
+    .date-info {
+        color: #6c757d;
+        font-size: 12px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .action-btn {
+        background: none;
+        border: none;
+        color: #007bff;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 3px;
+        transition: all 0.3s;
+        font-size: 14px;
+    }
+    
+    .action-btn:hover {
+        background: #e9ecef;
+        color: #0056b3;
+    }
+    
+    .action-btn.edit { color: #28a745; }
+    .action-btn.delete { color: #dc3545; }
+    .action-btn.call { color: #17a2b8; }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    .empty-state h5 {
+        margin-bottom: 10px;
+        color: #495057;
+    }
+    
+    .empty-state p {
+        margin-bottom: 20px;
+    }
+    
+    .filter-info {
+        background: #e9ecef;
+        padding: 8px 15px;
+        margin-bottom: 0;
+        border-top: 1px solid #dee2e6;
+        font-size: 13px;
+        color: #495057;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    /* Modal Styles */
+    .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .modal-title {
+        color: #495057;
+        font-weight: 600;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        width: 100%;
+    }
+    
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+    
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    
+    .alert-custom {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        animation: slideInRight 0.3s ease-in-out;
+    }
+    
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .form-error {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+    
+    .error-message {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .input-group {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .input-group .form-control {
+        flex: 1;
+    }
+    
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+    }
+</style>
+
+<div class="clients-main-content">
+    <!-- Month Search Section -->
+    <div class="month-search-section">
+        <input type="month" class="month-input" value="{{ month_filter|default:'2024-12' }}" name="month_filter">
+        <button class="search-btn" onclick="filterByMonth()">
+            <i class="fa-solid fa-search"></i> Search
+        </button>
+        <div class="breadcrumb-section">
+            <i class="fa-solid fa-home"></i> My Clients / All Clients
+        </div>
+    </div>
+    
+    <!-- Clients Table -->
+    <div class="clients-table-container">
+        <!-- Table Header -->
+        <div class="table-header">
+            <h4 class="table-title">
+                <i class="fa-solid fa-users"></i> My Clients > All Clients
+            </h4>
+            <button class="add-client-btn" onclick="openAddClientModal()">
+                <i class="fa-solid fa-plus"></i> Add New Client
+            </button>
+        </div>
+        
+        <!-- Table Content -->
+        <div class="table-responsive">
+            <table class="clients-table">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Business</th>
+                        <th>Phone</th>
+                        <th>Remark</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                        <th>Date Added</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="clientsTableBody">
+                    {% if clients %}
+                        {% for client in clients %}
+                        <tr>
+                            <td>
+                                <div class="customer-info">
+                                    <strong>{{ client.customer_name }}</strong>
+                                    {% if client.business_email %}
+                                        <div class="customer-email">{{ client.business_email }}</div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="business-info">
+                                    {% if client.business_name %}
+                                        <strong>{{ client.business_name }}</strong>
+                                        {% if client.industry_type %}
+                                            <div class="business-type">{{ client.industry_type }}</div>
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="color: #6c757d;">-</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="phone-number">{{ client.primary_phone }}</div>
+                                {% if client.secondary_phone %}
+                                    <div style="color: #6c757d; font-size: 12px;">{{ client.secondary_phone }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="remark-text" title="{{ client.remark }}">
+                                    {{ client.remark|default:"-" }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ client.project_status|lower|cut:' ' }}">
+                                    {{ client.project_status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="amount-info">
+                                    <div class="total-amount">₹{{ client.total_amount|floatformat:0 }}</div>
+                                    <div class="advance-amount">Advance: ₹{{ client.advance_amount|floatformat:0 }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-info">
+                                    {{ client.created_at|date:"d M Y" }}<br>
+                                    <small>{{ client.created_at|time:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="View Details" onclick="viewClient('{{ client.client_id }}')">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn edit" title="Edit Client" onclick="editClient('{{ client.client_id }}')">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn call" title="Call Client" onclick="callClient('{{ client.primary_phone }}')">
+                                        <i class="fa-solid fa-phone"></i>
+                                    </button>
+                                    <button class="action-btn" title="Transfer Client" onclick="transferClient('{{ client.client_id }}')">
+                                        <i class="fa-solid fa-exchange-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr id="emptyStateRow">
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-users"></i>
+                                    <h5>No Clients Found</h5>
+                                    <p>You haven't added any clients yet or no clients match the current filter.</p>
+                                    <button class="add-client-btn" onclick="openAddClientModal()">
+                                        <i class="fa-solid fa-plus"></i> Add Your First Client
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if clients %}
+        <div class="filter-info">
+            <i class="fa-solid fa-info-circle"></i> 
+            Showing {{ clients|length }} client{{ clients|length|pluralize }} 
+            {% if request.GET.month_filter %}for {{ request.GET.month_filter }}{% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Alert Container -->
+<div id="alertContainer"></div>
+
+<!-- ============================================================== -->
+<!--                  ADD NEW CLIENT MODAL                          -->
+<!-- ============================================================== -->
+<div class="modal fade" id="addClientModal" tabindex="-1" aria-labelledby="addClientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addClientModalLabel">Add New Client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <form id="addClientForm" method="POST" action="{% url 'add_client' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Customer Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="customer_name" required>
+                                <div class="error-message" id="error_customer_name"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Business Name</label>
+                                <input type="text" class="form-control" name="business_name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Business Address</label>
+                                <input type="text" class="form-control" name="business_address">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Primary Phone <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" name="primary_phone" required>
+                                <div class="error-message" id="error_primary_phone"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Secondary Phone</label>
+                                <input type="tel" class="form-control" name="secondary_phone">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Business Email</label>
+                                <input type="email" class="form-control" name="business_email">
+                                <div class="error-message" id="error_business_email"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Business GST Number</label>
+                                <input type="text" class="form-control" name="business_gst_number">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Industry Type</label>
+                                <input type="text" class="form-control" name="industry_type">
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Work Required (Project Type)</label>
+                                <input type="text" class="form-control" name="project_type" value="Web Design & Development">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Project Handover date (Due Date)</label>
+                                <input type="date" class="form-control" name="project_handover_date">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Any Remark</label>
+                        <textarea class="form-control" name="remark" rows="2"></textarea>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Project Status <span class="text-danger">*</span></label>
+                                <select class="form-control" name="project_status" required>
+                                    <option value="New" selected>New</option>
+                                    <option value="Contacted">Contacted</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Total Payable & Advance Amount (INR) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" placeholder="Total Amount" name="total_amount" required min="0">
+                                    <input type="number" class="form-control" placeholder="Advance Amount" name="advance_amount" value="0" min="0">
+                                </div>
+                                <div class="error-message" id="error_total_amount"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
+                    <button type="submit" class="btn btn-primary" id="saveClientBtn">Save Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let addClientModal;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔥 My Clients page loaded');
+    
+    // Initialize modal
+    const modalElement = document.getElementById('addClientModal');
+    if (modalElement) {
+        addClientModal = new bootstrap.Modal(modalElement);
+    }
+    
+    // Form submission handler
+    const addClientForm = document.getElementById('addClientForm');
+    if (addClientForm) {
+        addClientForm.addEventListener('submit', handleFormSubmit);
+    }
+});
+
+// Open modal function
+function openAddClientModal() {
+    console.log('Opening add client modal');
+    if (addClientModal) {
+        addClientModal.show();
+    }
+}
+
+// Close modal function
+function closeModal() {
+    if (addClientModal) {
+        addClientModal.hide();
+        document.getElementById('addClientForm').reset();
+        clearFormErrors();
+    }
+}
+
+// Form submit handler
+function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    console.log('🚀 Form submitted');
+    
+    // Get form data
+    const formData = new FormData(e.target);
+    const saveButton = document.getElementById('saveClientBtn');
+    
+    // Basic validation
+    const customerName = formData.get('customer_name').trim();
+    const primaryPhone = formData.get('primary_phone').trim();
+    const totalAmount = formData.get('total_amount').trim();
+    
+    if (!customerName) {
+        showAlert('error', 'Customer name is required');
+        document.querySelector('[name="customer_name"]').focus();
+        return;
+    }
+    
+    if (!primaryPhone) {
+        showAlert('error', 'Primary phone is required');
+        document.querySelector('[name="primary_phone"]').focus();
+        return;
+    }
+    
+    if (!totalAmount || totalAmount <= 0) {
+        showAlert('error', 'Total amount is required and must be greater than 0');
+        document.querySelector('[name="total_amount"]').focus();
+        return;
+    }
+    
+    // Show loading state
+    saveButton.disabled = true;
+    saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+    
+    console.log('Sending data to:', e.target.action);
+    
+    // Send AJAX request
+    fetch(e.target.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('✅ Server response:', data);
+        
+        if (data.status === 'success') {
+            showAlert('success', data.message);
+            
+            // Add client to table
+            addClientToTable(data.client);
+            
+            // Close modal and reset form
+            closeModal();
+            
+        } else if (data.status === 'warning') {
+            showAlert('warning', data.message);
+        } else {
+            showAlert('error', data.message || 'Something went wrong');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error:', error);
+        showAlert('error', 'Network error. Please try again.');
+    })
+    .finally(() => {
+        // Re-enable button
+        saveButton.disabled = false;
+        saveButton.innerHTML = 'Save Client';
+    });
+}
+
+// Add client to table
+function addClientToTable(client) {
+    const tbody = document.getElementById('clientsTableBody');
+    const emptyRow = document.getElementById('emptyStateRow');
+    
+    // Remove empty state if exists
+    if (emptyRow) {
+        emptyRow.remove();
+    }
+    
+    // Create new row
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td>
+            <div class="customer-info">
+                <strong>${client.customer_name}</strong>
+                ${client.business_email ? `<div class="customer-email">${client.business_email}</div>` : ''}
+            </div>
+        </td>
+        <td>
+            <div class="business-info">
+                ${client.business_name ? `<strong>${client.business_name}</strong>` : '<span style="color: #6c757d;">-</span>'}
+                ${client.industry_type ? `<div class="business-type">${client.industry_type}</div>` : ''}
+            </div>
+        </td>
+        <td>
+            <div class="phone-number">${client.primary_phone}</div>
+            ${client.secondary_phone ? `<div style="color: #6c757d; font-size: 12px;">${client.secondary_phone}</div>` : ''}
+        </td>
+        <td>
+            <div class="remark-text" title="${client.remark || ''}">
+                ${client.remark || '-'}
+            </div>
+        </td>
+        <td>
+            <span class="status-badge status-${client.project_status.toLowerCase().replace(' ', '')}">
+                ${client.project_status}
+            </span>
+        </td>
+        <td>
+            <div class="amount-info">
+                <div class="total-amount">₹${parseFloat(client.total_amount).toLocaleString()}</div>
+                <div class="advance-amount">Advance: ₹${parseFloat(client.advance_amount).toLocaleString()}</div>
+            </div>
+        </td>
+        <td>
+            <div class="date-info">
+                ${new Date().toLocaleDateString()}<br>
+                <small>${new Date().toLocaleTimeString()}</small>
+            </div>
+        </td>
+        <td>
+            <div class="action-buttons">
+                <button class="action-btn" title="View Details" onclick="viewClient('${client.id}')">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+                <button class="action-btn edit" title="Edit Client" onclick="editClient('${client.id}')">
+                    <i class="fa-solid fa-edit"></i>
+                </button>
+                <button class="action-btn call" title="Call Client" onclick="callClient('${client.primary_phone}')">
+                    <i class="fa-solid fa-phone"></i>
+                </button>
+                <button class="action-btn" title="Transfer Client" onclick="transferClient('${client.id}')">
+                    <i class="fa-solid fa-exchange-alt"></i>
+                </button>
+            </div>
+        </td>
+    `;
+    
+    // Add to top of table
+    tbody.insertBefore(newRow, tbody.firstChild);
+    
+    console.log('✅ Client added to table:', client.customer_name);
+}
+
+// Show alert function
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'warning' ? 'alert-warning' : 'alert-danger';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show alert-custom" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">×</button>
+        </div>
+    `;
+    
+    document.getElementById('alertContainer').innerHTML = alertHtml;
+    
+    // Auto hide after 5 seconds
+    setTimeout(function() {
+        const alert = document.querySelector('.alert-custom');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+// Clear form errors
+function clearFormErrors() {
+    document.querySelectorAll('.form-control').forEach(el => el.classList.remove('form-error'));
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+}
+
+// Other functions
+function filterByMonth() {
+    const monthInput = document.querySelector('input[name="month_filter"]');
+    if (monthInput.value) {
+        const url = new URL(window.location);
+        url.searchParams.set('month_filter', monthInput.value);
+        window.location.href = url.toString();
+    }
+}
+
+function viewClient(clientId) {
+    console.log('View client:', clientId);
+    // Implement view functionality
+}
+
+function editClient(clientId) {
+    console.log('Edit client:', clientId);
+    // Implement edit functionality
+}
+
+function callClient(phoneNumber) {
+    console.log('Call client:', phoneNumber);
+    alert(`Calling ${phoneNumber}...`);
+}
+
+function transferClient(clientId) {
+    console.log('Transfer client:', clientId);
+    // Implement transfer functionality
+}
+
+// Auto-submit form on month change
+document.addEventListener('DOMContentLoaded', function() {
+    const monthInput = document.querySelector('input[name="month_filter"]');
+    if (monthInput) {
+        monthInput.addEventListener('change', filterByMonth);
+    }
+});
+</script>
+{% endblock %}
